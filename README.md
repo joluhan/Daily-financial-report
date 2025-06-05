@@ -68,29 +68,34 @@ Or install from requirements.txt:
 pip install -r requirements.txt
 ```
 
-### 4. Set Up OpenAI API Key
+### 4. Create API Key File
 
-#### Option A: Environment Variable (Recommended)
+Create a text file named `api_key.txt` in your project directory:
+
 ```powershell
-# Set API key for current session
-$env:OPENAI_API_KEY = "your_api_key_here"
+# Create the API key file
+New-Item -Path "api_key.txt" -ItemType File
 
-# Or set permanently (requires restart)
-[System.Environment]::SetEnvironmentVariable("OPENAI_API_KEY", "your_api_key_here", "User")
+# Open the file in notepad to add your API key
+notepad api_key.txt
 ```
 
-#### Option B: Modify Script Directly
-Edit the script and replace:
-```python
-self.openai_api_key = os.getenv('OPENAI_API_KEY', 'your_openai_api_key_here')
+In the `api_key.txt` file, paste your OpenAI API key (just the key, nothing else):
 ```
+sk-your-actual-api-key-here
+```
+
+**Important**: 
+- Save the file with just the API key (no extra spaces or lines)
+- Make sure the file is named exactly `api_key.txt`
+- Keep this file secure and never share it publicly
 
 ### 5. Get Your OpenAI API Key
 
 1. Go to [OpenAI Platform](https://platform.openai.com/api-keys)
 2. Sign in to your account
 3. Click "Create new secret key"
-4. Copy the key and use it in step 4 above
+4. Copy the key and paste it into your `api_key.txt` file
 
 ## Usage
 
@@ -143,9 +148,19 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 
 ### API Key Issues
 
-1. Verify your API key is correct
-2. Check your OpenAI account has sufficient credits
-3. Ensure the API key has proper permissions
+1. Verify your `api_key.txt` file exists and contains the correct API key
+2. Check that there are no extra spaces or characters in the file
+3. Ensure your OpenAI account has sufficient credits
+4. Make sure the API key has proper permissions
+
+**Common API Key File Issues:**
+```powershell
+# Check if file exists
+Test-Path "api_key.txt"
+
+# View file content (be careful not to expose your key)
+Get-Content "api_key.txt"
+```
 
 ### Module Import Errors
 
@@ -190,6 +205,7 @@ Daily-financial-report/
 ├── env/                    # Virtual environment
 ├── financial_report.py     # Main script
 ├── requirements.txt        # Dependencies
+├── api_key.txt            # Your OpenAI API key (create this)
 ├── README.md              # This file
 └── Rapport_Marche_*.xlsx  # Generated reports
 ```
