@@ -11,23 +11,8 @@ class FinancialReportGenerator:
         self.openai_api_key = self.load_api_key()
         
         # Initialize OpenAI client
-        self.client = OpenAI(api_key=self.openai_api_key)
-    
-    def load_api_key(self):
-        """Load API key from api_key.txt file"""
-        try:
-            with open('api_key.txt', 'r', encoding='utf-8') as file:
-                api_key = file.read().strip()
-                if not api_key:
-                    raise ValueError("API key file is empty")
-                return api_key
-        except FileNotFoundError:
-            print("❌ Error: api_key.txt file not found")
-            print("Please create an api_key.txt file with your OpenAI API key")
-            return None
-        except Exception as e:
-            print(f"❌ Error reading API key: {e}")
-            return None
+        if self.openai_api_key:
+            self.client = OpenAI(api_key=self.openai_api_key)
         
         # Your prompt
         self.prompt = """Génère un tableau structuré au format exportable (Excel) contenant le rapport financier quotidien pour les paires suivantes :  
@@ -58,6 +43,22 @@ Retourne UNIQUEMENT un JSON valide avec cette structure exacte :
     }
   ]
 }"""
+
+    def load_api_key(self):
+        """Load API key from api_key.txt file"""
+        try:
+            with open('api_key.txt', 'r', encoding='utf-8') as file:
+                api_key = file.read().strip()
+                if not api_key:
+                    raise ValueError("API key file is empty")
+                return api_key
+        except FileNotFoundError:
+            print("❌ Error: api_key.txt file not found")
+            print("Please create an api_key.txt file with your OpenAI API key")
+            return None
+        except Exception as e:
+            print(f"❌ Error reading API key: {e}")
+            return None
 
     def generate_report_standard_api(self):
         """Generate report using standard Chat Completions API"""
@@ -103,6 +104,10 @@ Retourne UNIQUEMENT un JSON valide avec cette structure exacte :
     def parse_response(self, content):
         """Parse the API response to extract JSON data"""
         try:
+            # Remove markdown code blocks if present
+            content = re.sub(r'```json\s*', '', content)
+            content = re.sub(r'```\s*$', '', content)
+            
             # Extract JSON from response (in case there's extra text)
             json_match = re.search(r'\{.*\}', content, re.DOTALL)
             if json_match:
