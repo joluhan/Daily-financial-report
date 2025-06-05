@@ -63,7 +63,7 @@ Retourne UNIQUEMENT un JSON valide avec cette structure exacte :
         """Generate report using standard Chat Completions API"""
         try:
             response = self.client.chat.completions.create(
-                model="gpt-4",
+                model="gpt-4o",  # Using gpt-4o which is more current
                 messages=[
                     {"role": "system", "content": "Tu es un analyste financier expert. Réponds UNIQUEMENT avec du JSON valide."},
                     {"role": "user", "content": self.prompt}
@@ -75,23 +75,29 @@ Retourne UNIQUEMENT un JSON valide avec cette structure exacte :
             return self.parse_response(content)
             
         except Exception as e:
-            print(f"Error with standard API: {e}")
+            print(f"Error with Chat Completions API: {e}")
             return None
 
-    def generate_report_responses_api(self):
-        """Generate report using your responses.create API format"""
+    def generate_report_with_search(self):
+        """Generate report with web search - simplified approach"""
         try:
-            response = self.client.responses.create(
-                model="gpt-4.1",
-                tools=[{"type": "web_search_preview"}],
-                input=self.prompt
+            # Add web search instruction to the prompt
+            search_prompt = self.prompt + "\n\nIMPORTANT: Recherche les actualités financières et économiques les plus récentes pour chaque paire avant de formuler ton analyse."
+            
+            response = self.client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "Tu es un analyste financier expert avec accès aux données de marché actuelles. Utilise tes connaissances les plus récentes pour analyser les marchés. Réponds UNIQUEMENT avec du JSON valide."},
+                    {"role": "user", "content": search_prompt}
+                ],
+                temperature=0.7
             )
             
-            content = response.output_text
+            content = response.choices[0].message.content.strip()
             return self.parse_response(content)
             
         except Exception as e:
-            print(f"Error with responses API: {e}")
+            print(f"Error with enhanced API: {e}")
             return None
 
     def parse_response(self, content):
@@ -171,12 +177,13 @@ Retourne UNIQUEMENT un JSON valide avec cette structure exacte :
             print("❌ Cannot proceed without API key")
             return
         
-        # Try the responses API first, then fall back to standard API
+        # Try different API approaches
         print("📡 Calling OpenAI API...")
         
-        data = self.generate_report_responses_api()
+        # First try with enhanced search instructions
+        data = self.generate_report_with_search()
         if not data:
-            print("⚠️  Responses API failed, trying standard Chat API...")
+            print("⚠️  Enhanced API failed, trying standard Chat API...")
             data = self.generate_report_standard_api()
         
         if not data:
