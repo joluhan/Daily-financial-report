@@ -132,8 +132,12 @@ Retourne UNIQUEMENT un JSON valide avec cette structure exacte :
             today = datetime.now().strftime("%Y-%m-%d")
             filename = f"Rapport_Marche_{today}.xlsx"
             
+            # Get user's Downloads folder (works on any Windows computer)
+            downloads_path = os.path.join(os.path.expanduser("~"), "Downloads")
+            filepath = os.path.join(downloads_path, filename)
+            
             # Create Excel with formatting
-            with pd.ExcelWriter(filename, engine='openpyxl') as writer:
+            with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
                 df.to_excel(writer, sheet_name='Rapport Quotidien', index=False)
                 
                 # Get the workbook and worksheet for formatting
@@ -164,9 +168,9 @@ Retourne UNIQUEMENT un JSON valide avec cette structure exacte :
                 for row in range(2, len(data) + 2):
                     worksheet.row_dimensions[row].height = 60
             
-            print(f"✅ Excel file created successfully: {filename}")
+            print(f"✅ Excel file created successfully: {filepath}")
             print(f"📊 Report contains {len(data)} currency pairs")
-            return filename
+            return filepath
             
         except Exception as e:
             print(f"❌ Error creating Excel file: {e}")
